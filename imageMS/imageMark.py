@@ -221,3 +221,108 @@ class Ui_MarkWindow(QMainWindow):
             self.lineEdit_2.setText(self.waterimg[0]) # 显示选择的水印图片
         except Exception as e:
             print(e)
+
+    # 选择保存路径
+    def msg(self):
+        try:
+            self.dir_path = QFileDialog.getExistingDirectory(None, "选择路径", os.getcwd())
+            self.lineEdit_3.setText(self.dir_path)
+        except Exception as e:
+            print(e)
+
+    # 文件水印
+    def textMark(self, img, newImgPath):
+        try:
+            im = Image.open(img).convert("RGBA")
+            newImg = Image.new("RGBA", im.size, (255,255,255,0))
+            font = ImageFont.truetype("simkai.ttf", self.fontInfo.pointSize())
+            imagedraw = ImageDraw.Draw(newImg)
+            imgwidth, imgheight = im.size
+            txtwidth = self.fontSize.maxWidth() * len(self.lineEdit.text())
+            txtheight = self.fontSize.height()
+
+            if self.comboBox.currentText() == '左上角':
+                position = (0, 0)
+            elif self.comboBox.currentText() == '左下角':
+                position = (0, imgheight - txtheight)
+            elif self.comboBox.currentText() == '右上角':
+                position = (imgwidth - txtwidth, 0)
+            elif self.comboBox.currentText() == '右下角':
+                position = (imgwidth - txtwidth, imgheight - txtheight)
+            elif self.comboBox.currentText() == '居中位置':
+                position = (imgwidth / 2, imgheight / 2)
+
+            # 设置文字颜色
+            imagedraw.text(position, self.lineEdit.text(), font=font, fill="#FCA454")
+            alpha = newImg.split()[3]
+            alpha = ImageEnhance.Brightness(alpha).enhance(int(self.horizontalSlider.value())/10.0)
+            newImg.putdata(alpha)
+            Image.alpha_composite(im, newImg).save(newImgPath)
+        except Exception:
+            QMessageBox.warning(None, "错误", "图片格式有误, 请重新选择....", QMessageBox.Ok)
+
+        # 图片水印
+
+    def imgMark(self, img, newImgPath):
+        im = Image.open(img)  # 打开原始图片
+        mark = Image.open(self.lineEdit_2.text())  # 打开水印图片
+        rgbaim = im.convert('RGBA')  # 将原始图片转换为RGBA
+        rgbamark = mark.convert('RGBA')  # 将水印图片转换为RGBA
+        imgwidth, imgheight = rgbaim.size  # 获取原始图片尺寸
+        nimgwidth, nimgheight = rgbamark.size  # 获取水印图片尺寸
+        # 缩放水印图片
+        scale = 10
+        markscale = max(imgwidth / (scale * nimgwidth), imgheight / (scale * nimgheight))
+        newsize = (int(nimgwidth * markscale), int(nimgheight * markscale))  # 计算新的尺寸大小
+        rgbamark = rgbamark.resize(newsize, resample=Image.ANTIALIAS)  # 重新设置水印图片大小
+        nimgwidth, nimgheight = rgbamark.size  # 获取水印图片缩放后的尺寸
+        # 计算水印位置
+        if self.comboBox.currentText() == '左上角':
+            position = (0, 0)
+        elif self.comboBox.currentText() == '左下角':
+            position = (0, imgheight - nimgheight)
+        elif self.comboBox.currentText() == '右上角':
+            position = (imgwidth - nimgwidth, 0)
+        elif self.comboBox.currentText() == '右下角':
+            position = (imgwidth - nimgwidth, imgheight - nimgheight)
+        elif self.comboBox.currentText() == '居中位置':
+            position = (int(imgwidth / 2), int(imgheight / 2))
+        # 设置透明度：img.point(function)接受一个参数，且对图片中的每一个点执行这个函数，这个函数是一个匿名函数，使用lambda表达式来完成
+        # convert()函数，用于不同模式图像之间的转换，模式“L”为灰色图像，它的每个像素用8个bit表示，0表示黑，255表示白，其他数字表示不同的灰度。
+        # 在PIL中，从模式“RGB”转换为“L”模式是按照下面的公式转换的：L = R * 299/1000 + G * 587/1000+ B * 114/1000
+        rgbamarkpha = rgbamark.convert("L").point(lambda x: x / int(self.horizontalSlider.value()))
+        rgbamark.putalpha(rgbamarkpha)
+        # 水印位置
+        rgbaim.paste(rgbamark, position, rgbamarkpha)
+        try:
+            rgbaim.save(newImgPath)  # 保存水印图片
+        except Exception:
+            QMessageBox.warning(None, '错误', '请选择其他路径……', QMessageBox.Ok)
+
+        # 添加水印
+
+    def addMark(self):
+        if self.lineEdit_3.text() == '':  # 判断是否选择了保存路径
+            QMessageBox.warning(None, '警告', '请选择保存路径', QMessageBox.Ok)
+            return
+        else:
+            num = 0  # 记录处理图片数量
+            for i in range(0, self.listWidget.count()):  # 遍历图片列表
+                # 设置原始图片路径（包括文件名）
+                filepath = os.path.join(self.img_path, self.listWidget.item(i).text())
+                # 设置水印图片保存路径（包括文件名）
+                newfilepath = os.path.join(self.lineEdit_3.text(), self.listWidget.item(i).text())
+                if self.radioButton.isChecked():  # 判断是否选择文字水印单选按钮
+                    if self.lineEdit.text() == '':  # 判断是否输入了水印文字
+                        QMessageBox.warning(None, '警告', '请输入水印文字', QMessageBox.Ok)
+                        return
+                    else:
+                        self.textMark(filepath, newfilepath)  # 调用textMark方法添加文字水印
+                        num += 1  # 处理图片数量加1
+                else:
+                    if self.lineEdit_2.text() != '':  # 判断水印图片不为空
+                        self.imgMark(filepath, newfilepath)  # 调用imgMark方法添加图片水印
+                        num += 1  # 处理图片数量加1
+                    else:
+                        QMessageBox.warning(None, '警告', '请选择水印图片', QMessageBox.Ok)
+            self.statusBar.showMessage('任务完成，此次共处理 ' + str(num) + ' 张图片')  # 显示处理图片总数
