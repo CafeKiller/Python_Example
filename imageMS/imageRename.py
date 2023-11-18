@@ -1,8 +1,9 @@
 import os
 import os.path
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMainWindow,QFileDialog,QMessageBox
-from imageMS import imageMark # 导入模块
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
+from imageMS import imageMark  # 导入模块
+
 
 class Ui_RenameWindow(QMainWindow):
     def __init__(self):
@@ -22,7 +23,7 @@ class Ui_RenameWindow(QMainWindow):
         # 文件名大写单选按钮
         self.radioButton = QtWidgets.QRadioButton(self.groupBox)
         self.radioButton.setGeometry(QtCore.QRect(20, 30, 89, 16))
-        self.radioButton.setChecked(True) # 默认选中
+        self.radioButton.setChecked(True)  # 默认选中
         self.radioButton.setObjectName("radioButton")
         # 文件名小写单选按钮
         self.radioButton_2 = QtWidgets.QRadioButton(self.groupBox)
@@ -85,14 +86,14 @@ class Ui_RenameWindow(QMainWindow):
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(10, 210, 491, 191))
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(2) # 表格中添加两列
+        self.tableWidget.setColumnCount(2)  # 表格中添加两列
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(1, item)
-        self.tableWidget.setColumnWidth(0, 130)# 设置第一列宽度
-        self.tableWidget.horizontalHeader().setStretchLastSection(True) # 设置自动填充容器
+        self.tableWidget.setColumnWidth(0, 130)  # 设置第一列宽度
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)  # 设置自动填充容器
         self.tableWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)  # 垂直滚动条
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -103,7 +104,7 @@ class Ui_RenameWindow(QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.comboBox.setCurrentIndex(0) # 模板下拉列表中默认选择第一项
+        self.comboBox.setCurrentIndex(0)  # 模板下拉列表中默认选择第一项
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     # 自动生成的代码，用来设置窗体中控件的默认值
@@ -144,7 +145,7 @@ class Ui_RenameWindow(QMainWindow):
             num = 0
             self.tableWidget.setRowCount(0)
             self.tableWidget.clearContents()
-            for i in range(0, len(self.list) ):
+            for i in range(0, len(self.list)):
                 filepath = os.path.join(self.img_path, self.list[i])
                 if os.path.isfile(filepath):
                     imgType = os.path.splitext(filepath)[1]
@@ -157,3 +158,37 @@ class Ui_RenameWindow(QMainWindow):
         except Exception:
             QMessageBox.warning(None, "警告", "请选择一个有效路径......", QMessageBox.Ok)
 
+    # 批量重命名
+    def reName(self):
+        num = 0
+        file_name = ""
+        new_file_name = ""
+        try:
+            for i in range(self.tableWidget.rowCount()):
+                file_name = self.tableWidget.item(i, 0).text()
+                file_path = os.path.join(self.img_path, file_name)
+                if os.path.isfile(file_path):  # 判断是否为文件
+                    img_type = os.path.splitext(file_path)[1]
+                    if imageMark.Ui_MarkWindow().isImg(img_type):  # 文件大小写判断
+                        if self.radioButton.isChecked():
+                            new_file_name = str(file_name).upper()
+                            new_file_path = os.path.join(self.img_path, new_file_name)
+                            os.renames(file_path, new_file_path)
+                        elif self.radioButton_2.isChecked():
+                            new_file_name = str(file_name).lower()
+                            new_file_path = os.path.join(self.img_path, new_file_name)
+                            os.rename(file_path, new_file_path)
+                        elif self.radioButton_3.isChecked():
+                            str_id = self.comboBox.currentText()
+                            _id = int(self.lineEdit_2.text())
+                            step = int(self.lineEdit_3.text())
+                            template = '{:0>3d}'
+                            new_file_name = str_id[0:4] + template.format(_id + step * i) + img_type
+                            new_file_path = os.path.join(self.img_path, new_file_name)
+                            os.rename(file_path, new_file_path)
+                        num += 1
+                        self.tableWidget.setItem(i, 0, QtWidgets.QTableWidgetItem(new_file_name))
+            self.statusbar.showMessage("批量重命名完成, 共处理图片" + str(num) + "张")
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(None, "警告", "请选择正确的重命名方式", QMessageBox.Ok)

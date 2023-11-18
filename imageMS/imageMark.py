@@ -206,7 +206,7 @@ class Ui_MarkWindow(QMainWindow):
                         self.item = QtWidgets.QListWidgetItem(self.listWidget)  # 创建列表项
                         self.item.setText(self.list[i])  # 显示图片列表
             self.statusBar.showMessage('共有图片 ' + str(num) + ' 张')  # 显示图片总数
-        except  Exception:
+        except Exception:
             QMessageBox.warning(None, "警告", '请选择一个有效路径……', QMessageBox.Ok)
 
     # 预览图片
@@ -217,8 +217,8 @@ class Ui_MarkWindow(QMainWindow):
     def setImg(self):
         try:
             # waterimg即为选择的水印图片，第二形参为对话框标题，第三个为对话框打开后默认的路径
-            self.waterimg = QFileDialog.getOpenFileName(None, "选择水印图片", "C:\\", "图片文件(*.jpeg;*.png;*.jpg;*.bmp)")
-            self.lineEdit_2.setText(self.waterimg[0]) # 显示选择的水印图片
+            self.water_img = QFileDialog.getOpenFileName(None, "选择水印图片", "C:\\", "图片文件(*.jpeg;*.png;*.jpg;*.bmp)")
+            self.lineEdit_2.setText(self.water_img[0]) # 显示选择的水印图片
         except Exception as e:
             print(e)
 
@@ -231,71 +231,74 @@ class Ui_MarkWindow(QMainWindow):
             print(e)
 
     # 文件水印
-    def textMark(self, img, newImgPath):
+    def textMark(self, img, new_img_path):
         try:
             im = Image.open(img).convert("RGBA")
-            newImg = Image.new("RGBA", im.size, (255,255,255,0))
+            new_img = Image.new("RGBA", im.size, (255, 255, 255, 0))
+            # BUG :
+            # ERROR Message : 'builtin_function_or_method' object has no attribute 'pointSize'
             font = ImageFont.truetype("simkai.ttf", self.fontInfo.pointSize())
-            imagedraw = ImageDraw.Draw(newImg)
-            imgwidth, imgheight = im.size
-            txtwidth = self.fontSize.maxWidth() * len(self.lineEdit.text())
-            txtheight = self.fontSize.height()
+            image_draw = ImageDraw.Draw(new_img)
+            img_width, img_height = im.size
+            txt_width = self.fontSize.maxWidth() * len(self.lineEdit.text())
+            txt_height = self.fontSize.height()
 
             if self.comboBox.currentText() == '左上角':
                 position = (0, 0)
             elif self.comboBox.currentText() == '左下角':
-                position = (0, imgheight - txtheight)
+                position = (0, img_height - txt_height)
             elif self.comboBox.currentText() == '右上角':
-                position = (imgwidth - txtwidth, 0)
+                position = (img_width - txt_width, 0)
             elif self.comboBox.currentText() == '右下角':
-                position = (imgwidth - txtwidth, imgheight - txtheight)
+                position = (img_width - txt_width, img_height - txt_height)
             elif self.comboBox.currentText() == '居中位置':
-                position = (imgwidth / 2, imgheight / 2)
+                position = (img_width / 2, img_height / 2)
 
             # 设置文字颜色
-            imagedraw.text(position, self.lineEdit.text(), font=font, fill="#FCA454")
-            alpha = newImg.split()[3]
+            image_draw.text(position, self.lineEdit.text(), font=font, fill="#FCA454")
+            alpha = new_img.split()[3]
             alpha = ImageEnhance.Brightness(alpha).enhance(int(self.horizontalSlider.value())/10.0)
-            newImg.putdata(alpha)
-            Image.alpha_composite(im, newImg).save(newImgPath)
-        except Exception:
+            new_img.putdata(alpha)
+            Image.alpha_composite(im, new_img).save(new_img_path)
+        except Exception as e:
+            print(e)
             QMessageBox.warning(None, "错误", "图片格式有误, 请重新选择....", QMessageBox.Ok)
 
         # 图片水印
 
-    def imgMark(self, img, newImgPath):
+    def imgMark(self, img, new_img_path):
         im = Image.open(img)  # 打开原始图片
         mark = Image.open(self.lineEdit_2.text())  # 打开水印图片
-        rgbaim = im.convert('RGBA')  # 将原始图片转换为RGBA
-        rgbamark = mark.convert('RGBA')  # 将水印图片转换为RGBA
-        imgwidth, imgheight = rgbaim.size  # 获取原始图片尺寸
-        nimgwidth, nimgheight = rgbamark.size  # 获取水印图片尺寸
+        rgba_im = im.convert('RGBA')  # 将原始图片转换为RGBA
+        rgba_mark = mark.convert('RGBA')  # 将水印图片转换为RGBA
+        img_width, img_height = rgba_im.size  # 获取原始图片尺寸
+        nimg_width, nimg_height = rgba_mark.size  # 获取水印图片尺寸
         # 缩放水印图片
         scale = 10
-        markscale = max(imgwidth / (scale * nimgwidth), imgheight / (scale * nimgheight))
-        newsize = (int(nimgwidth * markscale), int(nimgheight * markscale))  # 计算新的尺寸大小
-        rgbamark = rgbamark.resize(newsize, resample=Image.ANTIALIAS)  # 重新设置水印图片大小
-        nimgwidth, nimgheight = rgbamark.size  # 获取水印图片缩放后的尺寸
+        mark_scale = max(img_width / (scale * nimg_width), img_height / (scale * nimg_height))
+        new_size = (int(nimg_width * mark_scale), int(nimg_height * mark_scale))  # 计算新的尺寸大小
+        rgba_mark = rgba_mark.resize(new_size, resample=Image.ANTIALIAS)  # 重新设置水印图片大小
+        nimg_width, nimg_height = rgba_mark.size  # 获取水印图片缩放后的尺寸
         # 计算水印位置
         if self.comboBox.currentText() == '左上角':
             position = (0, 0)
         elif self.comboBox.currentText() == '左下角':
-            position = (0, imgheight - nimgheight)
+            position = (0, img_height - nimg_width)
         elif self.comboBox.currentText() == '右上角':
-            position = (imgwidth - nimgwidth, 0)
+            position = (img_width - nimg_width, 0)
         elif self.comboBox.currentText() == '右下角':
-            position = (imgwidth - nimgwidth, imgheight - nimgheight)
+            position = (img_width - nimg_height, img_height - nimg_height)
         elif self.comboBox.currentText() == '居中位置':
-            position = (int(imgwidth / 2), int(imgheight / 2))
+            position = (int(img_width / 2), int(img_height / 2))
         # 设置透明度：img.point(function)接受一个参数，且对图片中的每一个点执行这个函数，这个函数是一个匿名函数，使用lambda表达式来完成
         # convert()函数，用于不同模式图像之间的转换，模式“L”为灰色图像，它的每个像素用8个bit表示，0表示黑，255表示白，其他数字表示不同的灰度。
         # 在PIL中，从模式“RGB”转换为“L”模式是按照下面的公式转换的：L = R * 299/1000 + G * 587/1000+ B * 114/1000
-        rgbamarkpha = rgbamark.convert("L").point(lambda x: x / int(self.horizontalSlider.value()))
-        rgbamark.putalpha(rgbamarkpha)
+        rgba_mark_pha = rgba_mark.convert("L").point(lambda x: x / int(self.horizontalSlider.value()))
+        rgba_mark.putalpha(rgba_mark_pha)
         # 水印位置
-        rgbaim.paste(rgbamark, position, rgbamarkpha)
+        rgba_im.paste(rgba_mark, position, rgba_mark_pha)
         try:
-            rgbaim.save(newImgPath)  # 保存水印图片
+            rgba_im.save(new_img_path)  # 保存水印图片
         except Exception:
             QMessageBox.warning(None, '错误', '请选择其他路径……', QMessageBox.Ok)
 

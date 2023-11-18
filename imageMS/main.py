@@ -1,6 +1,11 @@
+import typing
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtGui import QBrush, QPixmap
+
+import imageMS.imageMark
+import imageMS.imageRename
 
 
 class Ui_MainWindow(QtWidgets.QWidget):
@@ -81,11 +86,13 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     # 打开水印窗体
     def openMark(self):
-        pass
+        self.another = imageMS.imageMark.Ui_MarkWindow()
+        self.another.show()
 
     # 打开重命名窗体
     def openRename(self):
-        pass
+        self.another = imageMS.imageRename.Ui_RenameWindow()
+        self.another.show()
 
     # 关于本软件
     def about(self):
@@ -101,3 +108,7 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()  # 创建窗体对象
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
