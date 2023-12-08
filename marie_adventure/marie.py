@@ -1,5 +1,6 @@
 import pygame
 import sys
+from itertools import cycle
 
 SCREEN_WIDTH = 822
 SCREEN_HEIGHT = 199
@@ -40,6 +41,44 @@ class MusicButton:
         in_y = 20 < point_y < 20 + h
         return in_x and in_y
 
+
+# 玩家对象
+class Marie:
+    def __init__(self):
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.jump_state = False
+        self.jump_height = 130
+        self.lowest_y = 140
+        self.jump_value = 0
+        self.marie_index = 0
+        self.marie_index_gen = cycle([0, 1, 2])
+
+        self.adventure_img = (
+            pygame.image.load("image/adventure1.png").convert_alpha(),
+            pygame.image.load("image/adventure2.png").convert_alpha(),
+            pygame.image.load("image/adventure3.png").convert_alpha(),
+        )
+        # self.jump_audio = pygame.mixer.Sound()
+        self.rect.size = self.adventure_img[0].get_size()
+        self.x = 50
+        self.y = self.lowest_y
+        self.rect.top_left = (self.x, self.y)
+
+    # 跳跃
+    def jump(self):
+        self.jump_state = True
+
+    # 移动
+    def move(self):
+        if self.jump_state:
+            if self.rect.y >= self.lowest_y:
+                self.jump_value = -5
+            if self.rect.y <= self.lowest_y - self.jump_height:
+                self.jump_value = 5
+
+            self.rect.y += self.jump_value
+            if self.rect.y >= self.lowest_y:
+                self.jump_state = False
 
 # 游戏主函数
 def mainGame():
