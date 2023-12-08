@@ -129,6 +129,24 @@ class Obstacle:
     def draw_obstacle(self):
         SCREEN.blit(self.image, (self.rect.x, self.rect.y))
 
+    def get_score(self):
+        self.score
+        tmp = self.score
+        if tmp == 1:
+            pass
+        self.score = 0
+        return  tmp
+
+    def show_score(self, score):
+        self.score_digits = [int(x) for x in list(str(score))]
+        total_width = 0
+        for digit in self.score_digits:
+            total_width += self.numbers[digit].get_width()
+        x_offset = (SCREEN_WIDTH - (total_width + 30))
+        for digit in self.score_digits:
+            SCREEN.blit(self.numbers[digit], (x_offset, SCREEN_HEIGHT * 0.1))
+            x_offset += self.numbers[digit].get_width()
+
 
 # 游戏主函数
 def mainGame():
