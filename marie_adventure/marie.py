@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import sys
 from itertools import cycle
@@ -79,6 +81,54 @@ class Marie:
             self.rect.y += self.jump_value
             if self.rect.y >= self.lowest_y:
                 self.jump_state = False
+
+    def draw_marie(self):
+        marie_index = next(self.marie_index_gen)
+        SCREEN.blit(self.adventure_img[marie_index], (self.x, self.rect.y))
+
+
+# 障碍物类
+class Obstacle:
+    score = 1
+    move = 5
+    obstacle_y = 150
+
+    def __init__(self):
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.missile = pygame.image.load("image/missile.png").convert_alpha()
+        self.pipe = pygame.image.load("image/pipe.png").convert_alpha()
+        self.numbers = (
+            pygame.image.load("image/0.png").convert_alpha(),
+            pygame.image.load("image/1.png").convert_alpha(),
+            pygame.image.load("image/2.png").convert_alpha(),
+            pygame.image.load("image/3.png").convert_alpha(),
+            pygame.image.load("image/4.png").convert_alpha(),
+            pygame.image.load("image/5.png").convert_alpha(),
+            pygame.image.load("image/6.png").convert_alpha(),
+            pygame.image.load("image/7.png").convert_alpha(),
+            pygame.image.load("image/8.png").convert_alpha(),
+            pygame.image.load("image/9.png").convert_alpha(),
+        )
+        # self.score_audio = pygame.mixer.Sound()
+        r = random.randint(0, 1)
+        if r == 0:
+            self.image = self.missile
+            self.move = 15
+            self.obstacle_y = 100
+        else:
+            self.image = self.pipe
+        self.rect.size = self.image.get_size()
+        self.width, self.height = self.rect.size
+        self.x = 800
+        self.y = self.obstacle_y
+        self.rect.center = (self.x, self.y)
+
+    def obstacle_move(self):
+        self.rect.x = self.move
+
+    def draw_obstacle(self):
+        SCREEN.blit(self.image, (self.rect.x, self.rect.y))
+
 
 # 游戏主函数
 def mainGame():
