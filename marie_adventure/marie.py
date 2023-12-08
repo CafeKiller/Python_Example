@@ -135,7 +135,7 @@ class Obstacle:
         if tmp == 1:
             pass
         self.score = 0
-        return  tmp
+        return tmp
 
     def show_score(self, score):
         self.score_digits = [int(x) for x in list(str(score))]
@@ -158,7 +158,12 @@ def mainGame():
 
 # 游戏结束函数
 def gameOver():
-    pass
+    # bump_audio = pygame.mixer.Sound
+    # bump_audio.play()
+    screen_w = pygame.display.Info().current_w
+    screen_h = pygame.display.Info().current_h
+    over_img = pygame.image.load("image/gameover.png").convert_alpha()
+    SCREEN.blit(over_img, ((screen_w - over_img.get_size()) / 2, (screen_h - over_img.get_height()) / 2))
 
 
 if __name__ == "__main__":
