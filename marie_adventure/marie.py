@@ -153,7 +153,79 @@ def mainGame():
     score = 0
     over = False
     global SCREEN, FPS_CLOCK
-    pass
+    pygame.init()
+
+    FPS_CLOCK = pygame.time.Clock()
+    SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("玛丽大冒险")
+
+    bg1 = GameMap(0, 0)
+    bg2 = GameMap(800, 0)
+
+    marie = Marie()
+
+    add_obstacle_timer = 0
+    list = []
+
+    # music_button = MusicButton()
+    # btn_img = music_button.open_img
+    # music_button.bg_music.play(-1)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP:
+                # if music_button.is_open:
+                #     btn_img = music_button.close_img
+                #     music_button.is_open = False
+                #     music_button.bg_music.stop()
+                # else:
+                #     btn_img = music_button.open_img
+                #     music_button.is_open = True
+                #     music_button.bg_music.play(-1)
+                pass
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if marie.rect.y >= marie.lowest_y:
+                    marie.jump()
+                if over:
+                    mainGame()
+
+        if not over:
+
+            bg1.map_update()
+            bg1.map_rolling()
+
+            bg2.map_update()
+            bg2.map_rolling()
+
+            marie.move()
+            marie.draw_marie()
+
+            if add_obstacle_timer >= 1300:
+                r = random.randint(0, 100)
+                if r > 40:
+                    obstacle = Obstacle()
+                    list.append(obstacle)
+                add_obstacle_timer = 0
+
+            for i in range(len(list)):
+                list[i].obstacle_move()
+                list[i].draw_obstacle()
+
+                if pygame.sprite.collide_rect(marie, list[i]):
+                    over = True
+                    gameOver()
+                else:
+                    if (list[i].rect.x + list[i].rect.width) < marie.rect.x:
+                        score += list[i].get_score()
+                list[i].show_score(score)
+
+        add_obstacle_timer += 20
+        # SCREEN.blit(btn_img, (20, 20))
+        pygame.display.update()
+        FPS_CLOCK.tick(FPS)
 
 
 # 游戏结束函数
