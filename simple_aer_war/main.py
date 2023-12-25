@@ -64,3 +64,17 @@ class Player(pygame.sprite.Sprite):
             self.rect.left += self.speed
 
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, enemy_img, enemy_down_imgs, init_pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = enemy_img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = init_pos
+        self.speed = 2
+        self.down_index = 0
+
+    def move(self):
+        self.rect.top += self.speed
+
+
+
