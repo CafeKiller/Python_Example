@@ -1,8 +1,10 @@
-import pygame
+import codecs
 
+import pygame
 
 SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 800
+
 
 # 子弹类
 class Bullet(pygame.sprite.Sprite):
@@ -77,4 +79,30 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.top += self.speed
 
 
+# 写入文件
+def write_txt(content, strim, path):
+    f = codecs.open(path, strim, 'utf8')
+    f.write(str(content))
+    f.close()
 
+
+# 初始化
+pygame.init()
+screen = pygame.display.set_mode(SCREEN_WIDTH, SCREEN_HEIGHT)
+pygame.display.set_caption("简易版飞机大战")
+ic_launcher = pygame.image.load("image/ic_launcher.png").convert_alpha()
+pygame.display.set_icon(ic_launcher)
+background = pygame.image.load("image/background.png").convert_alpha()
+game_over = pygame.image.load("image/gameover.png").convert_alpha()
+plane_bullet = pygame.image.load("image/bullet.png").convert_alpha()
+
+player_img1 = pygame.image.load('image/player1.png')
+player_img2 = pygame.image.load('image/player2.png')
+player_img3 = pygame.image.load('image/player_off1.png')
+player_img4 = pygame.image.load('image/player_off2.png')
+player_img5 = pygame.image.load('image/player_off3.png')
+
+enemy_img1 = pygame.image.load('image/enemy1.png')
+enemy_img2 = pygame.image.load('image/enemy2.png')
+enemy_img3 = pygame.image.load('image/enemy3.png')
+enemy_img4 = pygame.image.load('image/enemy4.png')
