@@ -2,7 +2,6 @@ import this
 import turtle
 
 if __name__ == '__main__':
-
     print(this)
 
     ##
@@ -46,3 +45,14 @@ if __name__ == '__main__':
 
     turtle.home()
     turtle.mainloop()
+
+    a, b, c, d, e = 100, 3.14, 1 + 5j, "hello", True
+    print(type(a))
+    print(type(b))
+    print(type(c))
+    print(type(d))
+    print(type(e))
+
+    num1 = int(input('num1 = '))
+    num2 = int(input('num2 = '))
+    print("%d + %d = %d" % (num1, num2, num1 + num2))
